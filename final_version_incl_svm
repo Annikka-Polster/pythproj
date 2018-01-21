@@ -1,0 +1,117 @@
+#The aim of this project is to practice simple python application and get a feel for the language
+#I have chosen rather simple tasks to keep myself motivated, so this is just simple data handling and visualizations to see whats possible, 
+#..in preparation for the big project that I want to program during this year.
+
+# NOTE: the following has been conducted in anaconda/Spyder on windows
+
+
+## First step: install/import pandas -> for easy data processing
+
+#! pip install pandas  #if it needs to be installed
+
+import pandas as pd
+
+# Second step: import seaborn, a Python graphing library and matplotlib, a 2D plotting library
+#edit: seaborn generates warnings that can be ignored (according to the internet, so it must be true)
+# therefore: import warnings to ignore those warnings
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.set(style="white", color_codes=True)  #basic settings
+
+
+# I like testing my code with the Iris dataset (since i do a lot of clusteranalyses and its very useful for testing those)
+
+
+# Load the data
+from sklearn.datasets import load_iris
+iris = load_iris()
+
+
+# Defining indices for the features I want to plot
+
+index_x_axis = 0
+index_y_axis = 1
+
+# this formatter will label the colorbar with the correct target names
+label_colorbar = plt.FuncFormatter(lambda i, *args: iris.target_names[int(i)])
+
+plt.figure(figsize=(7, 5))     #define hight and width of figure
+plt.scatter(iris.data[:, index_x_axis], iris.data[:, index_y_axis], c=iris.target)   #for the scatterplot
+plt.colorbar(ticks=[0, 1, 2], format=label_colorbar)   #for the label on the right side
+plt.xlabel(iris.feature_names[index_x_axis])       #sepal legth on x-axis
+plt.ylabel(iris.feature_names[index_y_axis])       #sepal width on y-axis
+
+plt.tight_layout()   #plot the thing
+plt.show()  
+
+#note to self: colors are a bit ugly so change if needed
+
+#i like to make a boxplot of all my variables to detect outliers on a univariate level, so trying that in python
+
+#convert iris to dataframe to have it in the right format
+
+irisDF=pd.DataFrame(iris['data'])
+irisDF.columns=iris['feature_names']
+
+#generate an empty figure
+fig = plt.figure(1, figsize=(9, 6))
+
+# Fil the empty thing with something
+ax = fig.add_subplot(111)
+
+
+# Save the figure
+fig.savefig('fig1.png', bbox_inches='tight')  #save it
+
+
+#last thing; Im working quite a bit with machine learning now, and in R thats not very advanced
+#trying support vector machines in python, also on the iris dataset
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import svm, datasets
+
+
+#take only first two features to keep it simple
+
+X = iris.data[:, :2]  
+Y = iris.target
+
+
+#create a simple kernel for the svm  (Y.T is a 0/0 vector of the package)
+def homemade_kernel(X, Y):
+   
+    array = np.array([[2, 0], [0, 1.0]])
+    return np.dot(np.dot(X, array), Y.T)
+
+
+h = .03  # mesh step size. Since this is a quite simple dataset I chose a low mesh step size
+
+# fit the data to the support vector machine
+svm_fit = svm.SVC(kernel=homemade_kernel)
+svm_fit.fit(X, Y)
+
+# To understand the grouping, plot the decision boundary. Unfortunately I have not yet managed to assign the same colors as in the scatterplot above the mesh [x_min, x_max]x[y_min, y_max].
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+Z = svm_fit.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
+
+# to visualize how good the classification was, plot the training data on top of the decision border plot
+plt.scatter(X[:, 0], X[:, 1], c=Y, cmap=plt.cm.Paired, edgecolors='k')
+plt.title('simple svm of iris dataset')   #give it a title 
+plt.show()
+
+#blue has been classified well, but the other two have not been distinguished very correct. Maybe better if more features are used
+
+
+
+#conclusion...python is very cool but not trivial. So far I have managed to work in a modular fashion (combine existing solutions to get the results i want)
+#but i will need to go to the basics of objectoriented programming to improve my understanding of datahandling before I can proceed beyond this i think.
+
